@@ -15,6 +15,6 @@ func FraudScore(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, models.FraudScoreResponse{
 		Approved:   false,
-		FraudScore: 1.0,
+		FraudScore: 0.0,
 	})
 }

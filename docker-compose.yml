@@ -1,7 +1,7 @@
 services:
   lb:
+    container_name: lb
     image: nginx:1.27-alpine
-    platform: linux/amd64
     ports:
       - "9999:9999"
     volumes:
@@ -18,8 +18,10 @@ services:
           memory: "32MB"
 
   api1:
-    image: ${API_IMAGE:?defina API_IMAGE com uma imagem publica linux/amd64}
-    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: api1
     expose:
       - "8080"
     networks:
@@ -31,8 +33,10 @@ services:
           memory: "159MB"
 
   api2:
-    image: ${API_IMAGE:?defina API_IMAGE com uma imagem publica linux/amd64}
-    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: api2
     expose:
       - "8080"
     networks:

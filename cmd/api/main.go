@@ -6,7 +6,9 @@ import (
 )
 
 func main() {
-	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
 	handlers.Register(r)
 	_ = r.Run(":8080")
 }
