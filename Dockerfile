@@ -11,6 +11,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o
 FROM alpine:3.21
 RUN apk add --no-cache ca-certificates
 COPY --from=builder /out/api /api
+COPY data/ /data/
+ENV DATA_DIR=/data
 EXPOSE 8080
 USER nobody
 ENTRYPOINT ["/api"]
