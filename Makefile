@@ -1,12 +1,16 @@
 BASE_URL ?= http://localhost:9999
+IMAGE    ?= lhupalo/rbc-2026:latest
 
-.PHONY: build docker-build docker-up load-test-local show-results
+.PHONY: build docker-build docker-push docker-up load-test-local show-results
 
 build:
 	go build -trimpath -ldflags="-s -w" -o bin/api ./cmd/api
 
 docker-build:
-	docker compose build
+	docker build --platform linux/amd64 -t $(IMAGE) .
+
+docker-push: docker-build
+	docker push $(IMAGE)
 
 docker-up:
 	docker compose up -d
