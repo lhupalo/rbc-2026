@@ -24,6 +24,9 @@ services:
     image: api1
     expose:
       - "8080"
+    environment:
+      - GOMEMLIMIT=148MiB
+      - GOMAXPROCS=1
     networks:
       - app
     deploy:
@@ -39,6 +42,9 @@ services:
     image: api2
     expose:
       - "8080"
+    environment:
+      - GOMEMLIMIT=148MiB
+      - GOMAXPROCS=1
     networks:
       - app
     deploy:

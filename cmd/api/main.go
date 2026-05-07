@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lhupalo/rbc-2026/internal/detector"
@@ -26,5 +28,16 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	handlers.Register(r, det)
-	_ = r.Run(":8080")
+
+	srv := &http.Server{
+		Addr:              ":8080",
+		Handler:           r,
+		ReadHeaderTimeout: 500 * time.Millisecond,
+		ReadTimeout:       1 * time.Second,
+		WriteTimeout:      1500 * time.Millisecond,
+		IdleTimeout:       30 * time.Second,
+	}
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("servidor encerrado: %v", err)
+	}
 }
