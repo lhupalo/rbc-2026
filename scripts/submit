@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REQUIRED_BRANCH="main"
+SUBMISSION_BRANCH="submission"
+SUBMIT_FILES=("docker-compose.yml" "nginx.conf" "info.json")
+
+# ── validacoes ────────────────────────────────────────────────────────────────
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$CURRENT_BRANCH" != "$REQUIRED_BRANCH" ]; then
+    echo "erro: voce precisa estar na branch '$REQUIRED_BRANCH' para submeter."
+    echo "branch atual: $CURRENT_BRANCH"
+    exit 1
+fi
+
+if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo "erro: existem mudancas nao commitadas."
+    echo "faca commit ou stash antes de submeter."
+    exit 1
+fi
+
+# ── copia arquivos para diretorio temporario ──────────────────────────────────
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+FOUND=()
+for f in "${SUBMIT_FILES[@]}"; do
+    if [ -f "$f" ]; then
+        cp "$f" "$TMPDIR/"
+        FOUND+=("$f")
+    else
+        echo "aviso: '$f' nao encontrado, pulando."
+    fi
+done
+
+if [ ${#FOUND[@]} -eq 0 ]; then
+    echo "erro: nenhum arquivo de submissao encontrado."
+    exit 1
+fi
+
+# ── monta a branch submission ─────────────────────────────────────────────────
+
+if git show-ref --verify --quiet "refs/heads/$SUBMISSION_BRANCH"; then
+    git checkout "$SUBMISSION_BRANCH"
+    git rm -rf . --quiet
+else
+    git checkout --orphan "$SUBMISSION_BRANCH"
+    git rm -rf . --quiet
+fi
+
+for f in "${FOUND[@]}"; do
+    cp "$TMPDIR/$f" .
+    git add "$f"
+done
+
+git commit -m "submissao: atualiza arquivos de deploy"
+
+git checkout "$REQUIRED_BRANCH"
+
+# ── resultado ─────────────────────────────────────────────────────────────────
+
+echo ""
+echo "branch '$SUBMISSION_BRANCH' atualizada com os arquivos:"
+for f in "${FOUND[@]}"; do
+    echo "  - $f"
+done
+echo ""
+echo "para enviar: git push origin $SUBMISSION_BRANCH --force"
