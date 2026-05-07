@@ -2,6 +2,7 @@ services:
   lb:
     container_name: lb
     image: nginx:1.27-alpine
+    platform: linux/amd64
     ports:
       - "9999:9999"
     volumes:
@@ -17,11 +18,9 @@ services:
           cpus: "0.05"
           memory: "32MB"
 
-  api1:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: api1
+  api1: &api
+    image: lhupalo/rbc-2026:latest
+    platform: linux/amd64
     expose:
       - "8080"
     environment:
@@ -36,22 +35,7 @@ services:
           memory: "159MB"
 
   api2:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: api2
-    expose:
-      - "8080"
-    environment:
-      - GOMEMLIMIT=148MiB
-      - GOMAXPROCS=1
-    networks:
-      - app
-    deploy:
-      resources:
-        limits:
-          cpus: "0.475"
-          memory: "159MB"
+    <<: *api
 
 networks:
   app:
